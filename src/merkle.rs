@@ -1,7 +1,7 @@
 use sha2::{Digest, Sha256};
 use std::collections::VecDeque;
 
-/// 默克尔树节点
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 struct MerkleNode {
     hash: Vec<u8>,
