@@ -1,9 +1,9 @@
-use std::ops::{Add, Sub};
+use std::ops::Add;
 
 use num_bigint::{BigUint, RandBigInt, ToBigUint};
 use num_traits::{FromPrimitive, Num, One, Zero};
-use rand::Rng;
 use rand::rngs::OsRng;
+use rand::Rng;
 use sha2::{Digest, Sha256};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -184,7 +184,6 @@ impl Secp256k1 {
     }
 }
 
-
 /// 扩展欧几里得算法计算模逆
 fn mod_inverse(value: BigUint, modulo: &BigUint) -> BigUint {
     let mut t = BigUint::zero();
@@ -281,20 +280,26 @@ mod tests {
         let curve = Secp256k1::new();
 
         // 生成随机私钥并计算对应的公钥
-        let private_key = BigUint::from(111u32);
+        // let private_key = BigUint::from(111u32);
+        let private_key = BigUint::from_str_radix(
+            "4943ed36c9da4744f4e0b8200816b08a22fb54462785f2e62c22c835bc695be9",
+            16,
+        )
+        .expect("TODO: panic message");
         let public_key = curve.mul(&Secp256k1::g(), private_key.clone());
         println!("private_key {:?}", private_key);
         println!("public_key {:?}", public_key);
         // 计算消息摘要
         let message = b"Hello, Bitcoin!";
-        let msg_hash = curve.hash_message(message);
+        // let message = curve.hash_message(message);
+        let message = BigUint::from_bytes_be(message);
         println!("message{:?}", message);
         // 签名
-        let signature = curve.sign(&private_key, &msg_hash);
+        let signature = curve.sign(&private_key, &message);
         println!("signature{:?}", signature);
 
         // 验证签名
-        let is_valid = curve.verify(&signature, &msg_hash, &public_key);
+        let is_valid = curve.verify(&signature, &message, &public_key);
         assert!(is_valid, "Signature verification failed!");
     }
 
@@ -304,7 +309,11 @@ mod tests {
 
         // 生成随机私钥并计算对应的公钥
         // let private_key = curve.get_random_k();
-        let private_key = BigUint::from_str_radix("40121828775096451297723744859055496860799148363974524184949683262927962615227", 10).unwrap();
+        let private_key = BigUint::from_str_radix(
+            "40121828775096451297723744859055496860799148363974524184949683262927962615227",
+            10,
+        )
+        .unwrap();
         let public_key = curve.mul(&Secp256k1::g(), private_key.clone());
 
         // 计算消息摘要
